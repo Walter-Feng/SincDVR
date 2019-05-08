@@ -156,7 +156,10 @@ void gsl_matrix_mul(gsl_matrix * A, gsl_matrix *B, gsl_matrix * Result,int Acolu
 void gsl_matrix_complex_mul(gsl_matrix_complex * A, gsl_matrix_complex *B, gsl_matrix_complex * Result,int Acolumn,int Arow,int Bcolumn);
 double gsl_vector_inner_product(gsl_vector * A, gsl_vector * B,int length);
 gsl_complex gsl_vector_complex_product(gsl_vector_complex * A, gsl_vector_complex * B, int length);
+gsl_complex gsl_vector_complex_inner_product(gsl_vector_complex * A, gsl_vector_complex * B, int length);
 void gsl_vector_transform(gsl_vector * vec,gsl_matrix * trf,int length);
 void gsl_vector_complex_transform(gsl_vector_complex * vec, gsl_matrix_complex * trf,int length);
 void gsl_matrix_unitmatrix(gsl_matrix * m,int length);
 void gsl_matrix_complex_unitmatrix(gsl_matrix_complex * m,int length);
+void gsl_vector_complex_conjugate(gsl_vector_complex * v, int length);
+void gsl_matrix_complex_conjugate(gsl_matrix_complex * m, int rows, int columns);

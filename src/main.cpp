@@ -12,6 +12,7 @@ int main(int argc, char const *argv[])
     //Handling Files
     FILE * input;
     FILE * output;
+    FILE * outputlog;
 
     //strings, chars
     char str[100] = "";
@@ -31,9 +32,18 @@ int main(int argc, char const *argv[])
     int wavedefflag,potentialdefflag;
 
     //doubles
-    double min,max;
     double dt;
     double dx;
+
+    double momentum;
+    double translation;
+    double module;
+
+    dt = 1;
+    dx = 1;
+    momentum = 0;
+    translation = 0;
+    module = 1;
 
     //structs
     SumMap * wavefunction;
@@ -51,7 +61,8 @@ int main(int argc, char const *argv[])
     gsl_matrix_complex * gsl_matrix_complex_temp1;
     gsl_matrix_complex * gsl_matrix_complex_temp2;
     gsl_matrix_complex * hamiltonianmatrixconverted;
-
+    gsl_matrix_complex * momentummatrix;
+    gsl_matrix_complex * translationmatrix;
 
     gsl_vector * gridpoints;
     gsl_vector * weights;
@@ -63,9 +74,12 @@ int main(int argc, char const *argv[])
 
     gsl_vector_complex * gridvalues1;
     gsl_vector_complex * gridvalues2;
+    gsl_vector_complex * gsl_vector_complex_temp;
+    gsl_vector_complex * gsl_vector_complex_temp2;
     
     gsl_complex I;
     gsl_complex unit;
+    gsl_complex complextemp;
 
     GSL_SET_IMAG(&I,1);
     GSL_SET_REAL(&I,0);
@@ -107,6 +121,8 @@ int main(int argc, char const *argv[])
             }
             fclose(output);
             output = fopen(str,"w");
+            strcat(str,".log");
+            outputlog = fopen(str,"w");
             outputflag = 1;
         }
     }
@@ -127,6 +143,8 @@ int main(int argc, char const *argv[])
         }
         fclose(output);
         output = fopen(str,"w");
+        strcat(str,".log");
+        outputlog = fopen(str,"w");
     }
 
     // argument scanning end
@@ -136,10 +154,6 @@ int main(int argc, char const *argv[])
     while(fscanf(input,"%s",str) != EOF){
     // scanning basic constants
 
-        if(strcmp(str,"min:")==0)
-            fscanf(input,"%lf",&min);
-        if(strcmp(str,"max:")==0)
-            fscanf(input,"%lf",&max);
         if(strcmp(str,"grades:")==0)
             fscanf(input,"%d",&grades);
         if(strcmp(str,"dx:")==0)
@@ -186,9 +200,13 @@ int main(int argc, char const *argv[])
     gsl_matrix_complex_temp1 = gsl_matrix_complex_calloc(2*grades+1,2*grades+1);
     gsl_matrix_complex_temp2 = gsl_matrix_complex_calloc(2*grades+1,2*grades+1);
     hamiltonianmatrixconverted = gsl_matrix_complex_calloc(2*grades+1,2*grades+1);
+    momentummatrix = gsl_matrix_complex_calloc(2*grades+1,2*grades+1);
+    translationmatrix = gsl_matrix_complex_calloc(2*grades+1,2*grades+1);
 
     gridvalues1 = gsl_vector_complex_calloc(2*grades+1);
     gridvalues2 = gsl_vector_complex_calloc(2*grades+1);
+    gsl_vector_complex_temp = gsl_vector_complex_calloc(2*grades+1);
+    gsl_vector_complex_temp2 = gsl_vector_complex_calloc(2*grades+1);
 
     gridpoints = gsl_vector_calloc(2*grades+1);
     weights = gsl_vector_calloc(2*grades+1);    
@@ -202,8 +220,6 @@ int main(int argc, char const *argv[])
 
     //int series;
     int permutation_signum[2*grades+1];
-
-    // Generate the orthonormal basis for the system
 
     // Store the grid points
     for(i=0;i<2*grades+1;i++)
@@ -237,6 +253,40 @@ int main(int argc, char const *argv[])
         }
     }
 
+    //calculate the momentum matrix for the basis
+    for(i=0;i<2*grades+1;i++){
+        for(j=0;j<2*grades+1;j++){
+            if(i==j){
+                GSL_SET_REAL(&complextemp,0);
+                GSL_SET_IMAG(&complextemp,0);
+            }
+            else
+            {
+                GSL_SET_REAL(&complextemp,0);
+                GSL_SET_IMAG(&complextemp,gsl_pow_int(-planck,i-j+1)/(double) (i-j)/dx);
+            }
+            gsl_matrix_complex_set(momentummatrix,i,j,complextemp);
+            
+        }
+    }
+
+    //calculate the translation matrix for the basis
+    for(i=0;i<2*grades+1;i++){
+        for(j=0;j<2*grades+1;j++){
+            if(i==j){
+                GSL_SET_REAL(&complextemp,dx * ((double) (i-grades)));
+                GSL_SET_IMAG(&complextemp,0);
+            }
+            else
+            {
+                GSL_SET_REAL(&complextemp,0);
+                GSL_SET_IMAG(&complextemp,0);
+            }
+            gsl_matrix_complex_set(translationmatrix,i,j,complextemp);
+            
+        }
+    }
+
     //obtain the hamiltonian matrix in DVR
     gsl_matrix_diag(gsl_matrix_temp,potentialgrid,2*grades+1);
     gsl_matrix_add(gsl_matrix_temp,basis_kinetics);
@@ -264,29 +314,84 @@ int main(int argc, char const *argv[])
     gsl_vector_complex_convert(gsl_vector_temp,gridvalues1,2*grades+1);
 
     //print the information
-    fprintf(output,"\nHamiltonian Matrix:\n");
-    gsl_matrix_fprint(output,hamiltonianmatrix,2*grades+1,2*grades+1,"%20.6f");
-    fprintf(output,"\nGrid points:\n");
-    gsl_vector_fprint(output,gridpoints,2*grades+1,"%20.6f");
+    fprintf(output,"Basic Information:\n");
+    fprintf(output,"grades: %d\n",grades);
+    fprintf(output,"dx:%lf\n",dx);
+    fprintf(outputlog,"Basic Information:\n");
+    fprintf(outputlog,"grades: %d\n",grades);
+    fprintf(outputlog,"dx:%lf\n",dx);
+    fprintf(outputlog,"\nHamiltonian Matrix:\n");
+    gsl_matrix_fprint(outputlog,hamiltonianmatrix,2*grades+1,2*grades+1,"%20.6f");
+    fprintf(outputlog,"\nMomentum Matrix:\n");
+    gsl_matrix_complex_fprint(outputlog,momentummatrix,2*grades+1,2*grades+1,"%20.6f");
+    fprintf(outputlog,"\nGrid points:\n");
+    gsl_vector_fprint(outputlog,gridpoints,2*grades+1,"%20.6f");
 
-    fprintf(output,"\nSIMULATION START\n");
+    fprintf(outputlog,"\nSIMULATION START\n");
+
+    //calculate module
+    module = dx * GSL_REAL(gsl_vector_complex_inner_product(gridvalues1,gridvalues1,2*grades+1));
+
+    //calculate momentum
+    gsl_vector_complex_memcpy(gsl_vector_complex_temp,gridvalues1);
+    gsl_vector_complex_memcpy(gsl_vector_complex_temp2,gridvalues1);
+    gsl_vector_complex_transform(gsl_vector_complex_temp,momentummatrix,2*grades+1);
+    momentum = dx * GSL_REAL(gsl_vector_complex_inner_product(gsl_vector_complex_temp2,gsl_vector_complex_temp,2*grades+1))/module;
+
+    //calculate translation
+    gsl_vector_complex_memcpy(gsl_vector_complex_temp,gridvalues1);
+    gsl_vector_complex_memcpy(gsl_vector_complex_temp2,gridvalues1);
+    gsl_vector_complex_transform(gsl_vector_complex_temp,translationmatrix,2*grades+1);
+    translation = dx * GSL_REAL(gsl_vector_complex_inner_product(gsl_vector_complex_temp2,gsl_vector_complex_temp,2*grades+1))/module;
+
 
     for(step=0;step<recursiondepth;step++){
-        fprintf(output,"step = %d\ntime = %10.2f",step,((double) step)*dt);
+        fprintf(output,"step = %d\ntime = %lf",step,((double) step)*dt);
+        fprintf(output,"\nmodule = %lf",module);
+        fprintf(output,"\nmomentum = %lf",momentum);
+        fprintf(output,"\ntranslation = %lf\n",translation);
+        fprintf(outputlog,"step = %d\ntime = %14.6f",step,((double) step)*dt);
+        fprintf(outputlog,"\nmodule = %10.6f",module);
+        fprintf(outputlog,"\nmomentum = %20.6f",momentum);
+        fprintf(outputlog,"\ntranslation = %20.6f\n",translation);
         fprintf(output,"\ngrid values:\n");
         gsl_vector_complex_fprint(output,gridvalues1,2*grades+1,"%20.6f");
         gsl_vector_complex_memcpy(gridvalues2,gridvalues1);
         gsl_vector_complex_transform(gridvalues2,gsl_matrix_complex_temp2,2*grades+1);
         gsl_linalg_complex_LU_solve(gsl_matrix_complex_temp1,gsl_permutation_temp1,gridvalues2,gridvalues1);
+
+        //calculate module
+        module = dx * GSL_REAL(gsl_vector_complex_inner_product(gridvalues1,gridvalues1,2*grades+1));
+
+        //calculate momentum
+        gsl_vector_complex_memcpy(gsl_vector_complex_temp,gridvalues1);
+        gsl_vector_complex_memcpy(gsl_vector_complex_temp2,gridvalues1);
+        gsl_vector_complex_transform(gsl_vector_complex_temp,momentummatrix,2*grades+1);
+        momentum = dx * GSL_REAL(gsl_vector_complex_inner_product(gsl_vector_complex_temp2,gsl_vector_complex_temp,2*grades+1))/module;
+
+        //calculate translation
+        gsl_vector_complex_memcpy(gsl_vector_complex_temp,gridvalues1);
+        gsl_vector_complex_memcpy(gsl_vector_complex_temp2,gridvalues1);
+        gsl_vector_complex_transform(gsl_vector_complex_temp,translationmatrix,2*grades+1);
+        translation = dx * GSL_REAL(gsl_vector_complex_inner_product(gsl_vector_complex_temp2,gsl_vector_complex_temp,2*grades+1))/module;
     }
 
     fprintf(output,"\nFINALE\n");
-    fprintf(output,"step = %d\ntime = %10.2f",step,((double) step)*dt);
-    fprintf(output,"\ngrid values:\n");
-    gsl_vector_complex_fprint(output,gridvalues1,2*grades+1,"%20.6f");
+    fprintf(output,"step = %d\ntime = %lf",step,((double) step)*dt);
+    fprintf(output,"\nmodule = %lf",module);
+    fprintf(output,"\nmomentum = %lf",momentum);
+    fprintf(output,"\ntranslation = %lf\n",translation);
+    fprintf(outputlog,"\nFINALE\n");
+    fprintf(outputlog,"step = %d\ntime = %14.6f",step,((double) step)*dt);
+    fprintf(outputlog,"\nmodule = %10.6f",module);
+    fprintf(outputlog,"\nmomentum = %20.6f",momentum);
+    fprintf(outputlog,"\ntranslation = %20.6f\n",translation);   
+    fprintf(outputlog,"\ngrid values:\n");
+    gsl_vector_complex_fprint(outputlog,gridvalues1,2*grades+1,"%20.6f");
 
     fclose(input);
     fclose(output);
+    fclose(outputlog);
 
     return 0;
 }

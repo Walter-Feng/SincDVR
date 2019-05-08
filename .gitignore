@@ -28,11 +28,17 @@
 
 # Executables
 *.exe
-*.out
 *.app
+
+# Output files
+*.out
+*.log
 
 # .vscode
 .vscode
 
 # .DS_Store
 .DS_Store
+
+#DVR Executable
+DVR

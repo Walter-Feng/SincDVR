@@ -647,13 +647,15 @@ gsl_complex gsl_vector_complex_product(gsl_vector_complex * A, gsl_vector_comple
 gsl_complex gsl_vector_complex_inner_product(gsl_vector_complex * A, gsl_vector_complex * B, int length)
 {
     gsl_complex result;
+    gsl_complex temp;
     int i;
 
     GSL_SET_IMAG(&result,0);
     GSL_SET_REAL(&result,0);
 
     for(i=0;i<length;i++){
-        result = gsl_complex_add(result,gsl_complex_mul(gsl_complex_conjugate(gsl_vector_complex_get(A,i)),gsl_vector_complex_get(B,i)));
+        temp = gsl_complex_mul(gsl_complex_conjugate(gsl_vector_complex_get(A,i)),gsl_vector_complex_get(B,i));
+        result = gsl_complex_add(result,temp);
     }
 
     return result;
@@ -717,4 +719,29 @@ void gsl_matrix_complex_unitmatrix(gsl_matrix_complex * m,int length)
 
     for(int i=0;i<length;i++)
         gsl_matrix_complex_set(m,i,i,a);
+}
+
+void gsl_vector_complex_conjugate(gsl_vector_complex * v, int length)
+{
+    gsl_complex temp;
+    int i;
+
+    for(i=0;i<length;i++){
+        temp = gsl_complex_conjugate(gsl_vector_complex_get(v,i));
+        gsl_vector_complex_set(v,i,temp);
+    }
+}
+
+void gsl_matrix_complex_conjugate(gsl_matrix_complex * m, int rows, int columns)
+{
+    gsl_complex temp;
+    int i;
+    int j;
+
+    for(i=0;i<rows;i++){
+        for(j=0;j<columns;j++){
+            temp = gsl_complex_conjugate(gsl_matrix_complex_get(m,i,j));
+            gsl_matrix_complex_set(m,i,j,temp);
+        }
+    }
 }
