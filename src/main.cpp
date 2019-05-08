@@ -314,12 +314,12 @@ int main(int argc, char const *argv[])
     gsl_vector_complex_convert(gsl_vector_temp,gridvalues1,2*grades+1);
 
     //print the information
-    fprintf(output,"Basic Information:\n");
+    fprintf(output,"Initial Information:\n");
     fprintf(output,"grades: %d\n",grades);
-    fprintf(output,"dx:%lf\n",dx);
-    fprintf(outputlog,"Basic Information:\n");
+    fprintf(output,"dx: %lf\n",dx);
+    fprintf(outputlog,"Initial Information:\n");
     fprintf(outputlog,"grades: %d\n",grades);
-    fprintf(outputlog,"dx:%lf\n",dx);
+    fprintf(outputlog,"dx: %lf\n",dx);
     fprintf(outputlog,"\nHamiltonian Matrix:\n");
     gsl_matrix_fprint(outputlog,hamiltonianmatrix,2*grades+1,2*grades+1,"%20.6f");
     fprintf(outputlog,"\nMomentum Matrix:\n");
