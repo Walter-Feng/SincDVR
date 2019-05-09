@@ -355,7 +355,7 @@ int main(int argc, char const *argv[])
         fprintf(outputlog,"\nmomentum = %20.6f",momentum);
         fprintf(outputlog,"\ntranslation = %20.6f\n",translation);
         fprintf(output,"\ngrid values:\n");
-        gsl_vector_complex_fprint(output,gridvalues1,2*grades+1,"%20.6f");
+        gsl_vector_complex_fprint(outputlog,gridvalues1,2*grades+1,"%20.6f");
         gsl_vector_complex_memcpy(gridvalues2,gridvalues1);
         gsl_vector_complex_transform(gridvalues2,gsl_matrix_complex_temp2,2*grades+1);
         gsl_linalg_complex_LU_solve(gsl_matrix_complex_temp1,gsl_permutation_temp1,gridvalues2,gridvalues1);
