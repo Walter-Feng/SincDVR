@@ -1,7 +1,7 @@
 grades: 100
 dx: 0.1
 dt: 0.01
-recursiondepth: 5000
+recursiondepth: 500
 
 INIWAVEDEF
 
