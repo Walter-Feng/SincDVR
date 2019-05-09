@@ -29,7 +29,6 @@ int main(int argc, char const *argv[])
 
     //flags
     int inputflag,outputflag;
-    int wavedefflag,potentialdefflag;
 
     //doubles
     double dt;
@@ -65,12 +64,8 @@ int main(int argc, char const *argv[])
     gsl_matrix_complex * translationmatrix;
 
     gsl_vector * gridpoints;
-    gsl_vector * weights;
     gsl_vector * gsl_vector_temp;
-    gsl_vector * gsl_vector_temp2;
     gsl_vector * potentialgrid;
-    gsl_vector * coefficient_real;
-    gsl_vector * coefficient_imag;
 
     gsl_vector_complex * gridvalues1;
     gsl_vector_complex * gridvalues2;
@@ -92,8 +87,6 @@ int main(int argc, char const *argv[])
     //Initialization
     inputflag = 0;
     outputflag = 0;
-    wavedefflag = 0;
-    potentialdefflag = 0;
 
     wavefunction = new SumMap;
     potential = new SumMap;
@@ -208,12 +201,8 @@ int main(int argc, char const *argv[])
     gsl_vector_complex_temp = gsl_vector_complex_calloc(2*grades+1);
     gsl_vector_complex_temp2 = gsl_vector_complex_calloc(2*grades+1);
 
-    gridpoints = gsl_vector_calloc(2*grades+1);
-    weights = gsl_vector_calloc(2*grades+1);    
+    gridpoints = gsl_vector_calloc(2*grades+1);   
     gsl_vector_temp = gsl_vector_calloc(2*grades+1);
-    gsl_vector_temp2 = gsl_vector_calloc(2*grades+1);
-    coefficient_real = gsl_vector_calloc(2*grades+1);
-    coefficient_imag = gsl_vector_calloc(2*grades+1);
     potentialgrid = gsl_vector_calloc(2*grades+1);
 
     gsl_permutation_temp1 = gsl_permutation_calloc(2*grades+1);
