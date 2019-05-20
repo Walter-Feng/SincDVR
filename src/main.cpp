@@ -14,13 +14,24 @@ int main(int argc, char const *argv[])
     FILE * output;
     FILE * outputlog;
 
+    input = NULL;
+    output = NULL;
+    outputlog = NULL;
+
     //strings, chars
     char str[100] = "";
+    char outputstr[100] = "";
 
+    char *tempchar;
 
     //integers
     int grades;
     int recursiondepth;
+    long counts;
+    long counter;
+
+    counts = 0;
+    counter = 0;
 
     //loop int
     int i,j;
@@ -114,9 +125,16 @@ int main(int argc, char const *argv[])
             }
             fclose(output);
             output = fopen(str,"w");
-            strcat(str,".log");
-            outputlog = fopen(str,"w");
+            strcpy(outputstr,str);
             outputflag = 1;
+        }
+        if(strcmp(argv[i],"-log")==0){
+            strcat(outputstr,".log");
+            outputlog = fopen(outputstr,"w");
+        }
+
+        if(strcmp(argv[i],"-c")==0){
+            counts = strtol(argv[i+1],&tempchar,10);
         }
     }
 
@@ -306,10 +324,12 @@ int main(int argc, char const *argv[])
     fprintf(output,"Initial Information:\n");
     fprintf(output,"grades: %d\n",grades);
     fprintf(output,"dx: %lf\n",dx);
-    fprintf(outputlog,"Initial Information:\n");
-    fprintf(outputlog,"grades: %d\n",grades);
-    fprintf(outputlog,"dx: %lf\n",dx);
-    fprintf(outputlog,"\nHamiltonian Matrix:\n");
+    if(outputlog != NULL){
+        fprintf(outputlog,"Initial Information:\n");
+        fprintf(outputlog,"grades: %d\n",grades);
+        fprintf(outputlog,"dx: %lf\n",dx);
+        fprintf(outputlog,"\nHamiltonian Matrix:\n");
+    }
     gsl_matrix_fprint(outputlog,hamiltonianmatrix,2*grades+1,2*grades+1,"%20.6f");
     fprintf(outputlog,"\nMomentum Matrix:\n");
     gsl_matrix_complex_fprint(outputlog,momentummatrix,2*grades+1,2*grades+1,"%20.6f");
@@ -339,12 +359,26 @@ int main(int argc, char const *argv[])
         fprintf(output,"\nmodule = %lf",module);
         fprintf(output,"\nmomentum = %lf",momentum);
         fprintf(output,"\ntranslation = %lf\n",translation);
-        fprintf(outputlog,"step = %d\ntime = %14.6f",step,((double) step)*dt);
-        fprintf(outputlog,"\nmodule = %10.6f",module);
-        fprintf(outputlog,"\nmomentum = %20.6f",momentum);
-        fprintf(outputlog,"\ntranslation = %20.6f\n",translation);
-        fprintf(output,"\ngrid values:\n");
-        gsl_vector_complex_fprint(outputlog,gridvalues1,2*grades+1,"%20.6f");
+        if(counts != 0 && outputlog != NULL){
+            if(counter == 0){
+                fprintf(outputlog,"step = %d\ntime = %14.6f",step,((double) step)*dt);
+                fprintf(outputlog,"\nmodule = %10.6f",module);
+                fprintf(outputlog,"\nmomentum = %20.6f",momentum);
+                fprintf(outputlog,"\ntranslation = %20.6f\n",translation);
+                fprintf(outputlog,"\ngrid values:\n");
+                gsl_vector_complex_fprint(outputlog,gridvalues1,2*grades+1,"%20.6f");
+            }
+            counter++;
+            if(counter >= counts) counter = 0;
+        }
+        else if(counts == 0 && outputlog != NULL)
+                fprintf(outputlog,"step = %d\ntime = %14.6f",step,((double) step)*dt);
+                fprintf(outputlog,"\nmodule = %10.6f",module);
+                fprintf(outputlog,"\nmomentum = %20.6f",momentum);
+                fprintf(outputlog,"\ntranslation = %20.6f\n",translation);
+                fprintf(outputlog,"\ngrid values:\n");
+                gsl_vector_complex_fprint(outputlog,gridvalues1,2*grades+1,"%20.6f");
+        }
         gsl_vector_complex_memcpy(gridvalues2,gridvalues1);
         gsl_vector_complex_transform(gridvalues2,gsl_matrix_complex_temp2,2*grades+1);
         gsl_linalg_complex_LU_solve(gsl_matrix_complex_temp1,gsl_permutation_temp1,gridvalues2,gridvalues1);
