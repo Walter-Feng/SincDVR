@@ -116,8 +116,8 @@ int main(int argc, char const *argv[])
             inputflag = 1;
         }
         else if(strcmp(argv[i],"-o")==0){
-            output = fopen(str,"w");
-            strcpy(outputstr,str);
+            output = fopen(argv[i+1],"w");
+            strcpy(outputstr,argv[i+1]);
             outputflag = 1;
         }
         else if(strcmp(argv[i],"-log")==0){
@@ -137,7 +137,7 @@ int main(int argc, char const *argv[])
     }
     
     if(outputflag == 0){
-        strcpy(str,"output/NONAME.txt");
+        strcpy(str,"output/NONAME.out");
         fclose(output);
         output = fopen(str,"w");
         strcat(str,".log");
@@ -315,14 +315,13 @@ int main(int argc, char const *argv[])
         fprintf(outputlog,"grades: %d\n",grades);
         fprintf(outputlog,"dx: %lf\n",dx);
         fprintf(outputlog,"\nHamiltonian Matrix:\n");
+        gsl_matrix_fprint(outputlog,hamiltonianmatrix,2*grades+1,2*grades+1,"%20.6f");
+        fprintf(outputlog,"\nMomentum Matrix:\n");
+        gsl_matrix_complex_fprint(outputlog,momentummatrix,2*grades+1,2*grades+1,"%20.6f");
+        fprintf(outputlog,"\nGrid points:\n");
+        gsl_vector_fprint(outputlog,gridpoints,2*grades+1,"%20.6f");
+        fprintf(outputlog,"\nSIMULATION START\n");
     }
-    gsl_matrix_fprint(outputlog,hamiltonianmatrix,2*grades+1,2*grades+1,"%20.6f");
-    fprintf(outputlog,"\nMomentum Matrix:\n");
-    gsl_matrix_complex_fprint(outputlog,momentummatrix,2*grades+1,2*grades+1,"%20.6f");
-    fprintf(outputlog,"\nGrid points:\n");
-    gsl_vector_fprint(outputlog,gridpoints,2*grades+1,"%20.6f");
-
-    fprintf(outputlog,"\nSIMULATION START\n");
 
     //calculate module
     module = dx * GSL_REAL(gsl_vector_complex_inner_product(gridvalues1,gridvalues1,2*grades+1));
@@ -341,7 +340,7 @@ int main(int argc, char const *argv[])
 
 
     for(step=0;step<recursiondepth;step++){
-        fprintf(output,"step = %d\ntime = %lf",step,((double) step)*dt);
+        fprintf(output,"\nstep = %d\ntime = %lf",step,((double) step)*dt);
         fprintf(output,"\nmodule = %lf",module);
         fprintf(output,"\nmomentum = %lf",momentum);
         fprintf(output,"\ntranslation = %lf\n",translation);
