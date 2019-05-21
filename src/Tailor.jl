@@ -1,3 +1,9 @@
+global grades
+global step
+grades = 0
+step = 0
+
+
 input = ARGS[1]
 output = ARGS[2]
 countmax = Meta.parse(ARGS[3])

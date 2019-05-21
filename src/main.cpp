@@ -116,24 +116,16 @@ int main(int argc, char const *argv[])
             inputflag = 1;
         }
         else if(strcmp(argv[i],"-o")==0){
-            output = fopen(argv[i+1],"r");
-            strcpy(str,argv[i+1]);
-            while(output!=NULL){
-                strcat(str,".swp");
-                fclose(output);
-                output = fopen(str,"r");
-            }
-            fclose(output);
             output = fopen(str,"w");
             strcpy(outputstr,str);
             outputflag = 1;
         }
-        if(strcmp(argv[i],"-log")==0){
+        else if(strcmp(argv[i],"-log")==0){
             strcat(outputstr,".log");
             outputlog = fopen(outputstr,"w");
         }
 
-        if(strcmp(argv[i],"-c")==0){
+        else if(strcmp(argv[i],"-c")==0){
             counts = strtol(argv[i+1],&tempchar,10);
         }
     }
@@ -145,13 +137,7 @@ int main(int argc, char const *argv[])
     }
     
     if(outputflag == 0){
-        output = fopen("output/NONAME.txt","r");
         strcpy(str,"output/NONAME.txt");
-        while(output!=NULL){
-            strcat(str,".swp");
-            fclose(output);
-            output = fopen(str,"r");
-        }
         fclose(output);
         output = fopen(str,"w");
         strcat(str,".log");
@@ -371,7 +357,7 @@ int main(int argc, char const *argv[])
             counter++;
             if(counter >= counts) counter = 0;
         }
-        else if(counts == 0 && outputlog != NULL)
+        else if(counts == 0 && outputlog != NULL){
                 fprintf(outputlog,"step = %d\ntime = %14.6f",step,((double) step)*dt);
                 fprintf(outputlog,"\nmodule = %10.6f",module);
                 fprintf(outputlog,"\nmomentum = %20.6f",momentum);
@@ -404,17 +390,21 @@ int main(int argc, char const *argv[])
     fprintf(output,"\nmodule = %lf",module);
     fprintf(output,"\nmomentum = %lf",momentum);
     fprintf(output,"\ntranslation = %lf\n",translation);
-    fprintf(outputlog,"\nFINALE\n");
-    fprintf(outputlog,"step = %d\ntime = %14.6f",step,((double) step)*dt);
-    fprintf(outputlog,"\nmodule = %10.6f",module);
-    fprintf(outputlog,"\nmomentum = %20.6f",momentum);
-    fprintf(outputlog,"\ntranslation = %20.6f\n",translation);   
-    fprintf(outputlog,"\ngrid values:\n");
-    gsl_vector_complex_fprint(outputlog,gridvalues1,2*grades+1,"%20.6f");
+    if(outputlog != NULL){
+        fprintf(outputlog,"\nFINALE\n");
+        fprintf(outputlog,"step = %d\ntime = %14.6f",step,((double) step)*dt);
+        fprintf(outputlog,"\nmodule = %10.6f",module);
+        fprintf(outputlog,"\nmomentum = %20.6f",momentum);
+        fprintf(outputlog,"\ntranslation = %20.6f\n",translation);   
+        fprintf(outputlog,"\ngrid values:\n");
+        gsl_vector_complex_fprint(outputlog,gridvalues1,2*grades+1,"%20.6f");
+    }
 
     fclose(input);
     fclose(output);
-    fclose(outputlog);
+    if(outputlog != NULL){
+        fclose(outputlog);
+    }
 
     return 0;
 }
