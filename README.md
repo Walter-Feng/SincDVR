@@ -6,7 +6,13 @@ Currently this program is able to read arbitrary combination of elementary funct
 
 The program 'seems' to be written in C++, but actually it's completely C style (yes it is). 
 
-The program greatly utilizes GSL (GNU Scientific Library, https://www.gnu.org/software/gsl/). Thus you need to first install the whole package of this library to compile & run the program. Currently the compiling process is written as a shell script stored in /build.
+The program greatly utilizes GSL (GNU Scientific Library, https://www.gnu.org/software/gsl/). To compile, you can use cmake:
+
+```
+$ mkdir build
+$ cd build
+$ cmake .. -DCMAKE_INSTALL_PREFIX=/the/path/to/your/gsl/library
+```
 
 Two examples of writing an input file are given as txt files in /input. Use flag "-i" along with the path & file name of the input file to make an input, namely
 
