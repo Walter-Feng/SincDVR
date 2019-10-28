@@ -11,7 +11,8 @@ The program greatly utilizes GSL (GNU Scientific Library, https://www.gnu.org/so
 ```
 $ mkdir build
 $ cd build
-$ cmake .. -DCMAKE_INSTALL_PREFIX=/the/path/to/your/gsl/library
+$ CMAKE_PREFIX_PATH=/the/path/to/your/gsl/library cmake ..
+$ make
 ```
 
 Two examples of writing an input file are given as txt files in /input. Use flag "-i" along with the path & file name of the input file to make an input, namely
